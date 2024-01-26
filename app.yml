@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ex-p8s-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ex-p8s-app-py
+
+  template:
+    metadata:
+      labels:
+        app: ex-p8s-app-py
+    spec:
+      containers:
+        - name: ex-p8s-app-py
+          image: local.registry/ex-p8s-app:1.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DOCKERHUB_ORGANIZATION
+              value: ex-p8s
+            - name: POLLING_SECONDS
+              value: "600"
+            - name: METRICS_PORT
+              value: "2113" # Match this to ports.containerPort
+          ports:
+            - containerPort: 2113
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ex-p8s-app
+spec:
+  selector:
+    app: ex-p8s-app-py
+  ports:
+    - protocol: "TCP"
+      port: 2113
+      targetPort: 2113
+  type: LoadBalancer
