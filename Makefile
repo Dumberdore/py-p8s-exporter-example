@@ -2,12 +2,9 @@
 
 SH := /bin/bash
 
-APP_NAME=camunda-app
+APP_NAME=ex-prometheus-app
 VERSION=1.0.0
 LOCAL_REGISTRY=local.registry
-
-LINTER=registry.camunda.cloud/library/cytopia/pylint@sha256:e8acf4bea77afd6a924e57fae1dfacdd5f7e288c3cc276d044a9a3a0719676f5
-DOCKERFILE_LINTER=registry.camunda.cloud/library/replicated/dockerfilelint@sha256:15ce784e5847966b6d9a88cba348a9429f8b5212f6017180f10ce36b472dfe52
 
 # HELP
 # This will output the help for each task
@@ -27,18 +24,7 @@ build:  ## Builds docker image (for kind cluster)
 push:  ## Pushes (loads) docker image to the Kind local cluster
 	kind load docker-image $(LOCAL_REGISTRY)/$(APP_NAME):$(VERSION) --name $(CLUSTER)
 
-# MISC
-
-dockerfile-lint:  ## Runs Dockerfile linter
-	# hadolint does not provide images suitable for M1 yet
-	docker run $$( [[ "$$(uname -m)" == "arm64" ]] && echo " --platform linux/amd64" || echo "") --rm -i $(DOCKERFILE_LINTER) < Dockerfile
-
-lint:  ## Runs linter
-	docker run --rm -v `pwd`:/data \
-	  $(LINTER) --rcfile=.pylintrc -s n $(shell find src -name '*.py')
-
-fmt:  ## Runs formatter
-	@echo "..."
+# RUN
 
 run:
 	python3 src/main.py
